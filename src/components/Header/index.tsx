@@ -1,35 +1,41 @@
-import React, { useState, MouseEvent } from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import Toolbar from "@mui/material/Toolbar";
+import React, { useState, MouseEvent, useContext } from 'react';
+import AppBar from '@mui/material/AppBar';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Toolbar from '@mui/material/Toolbar';
+import MenuIcon from '@mui/icons-material/Menu';
+import Typography from '@mui/material/Typography';
 
-import MenuIcon from "@mui/icons-material/Menu";
+import { AuthenticationContext } from 'context/AuthenticationContext';
+import { NullableHtmlElement } from 'types';
+import Link from 'components/Link';
+import { Logo } from './Header.styles';
 
-import { NullableHtmlElement } from "types";
-import Link from "components/Link";
-import { Logo } from "./Header.styles";
-import { Typography } from "@mui/material";
-
-const pages = [{ name: "About", href: "/about" }];
+const pages = [
+  { name: 'About', href: '/about', authenticated: false },
+  { name: 'Authenticated Test', href: '/authenticatedExample', authenticated: true },
+];
 const logoProps = [
-  { key: "middle", value: { mr: 2, display: { xs: "none", md: "flex" } } },
-  { key: "small", value: { flexGrow: 2, display: { xs: "flex", md: "none" } } },
+  { key: 'middle', value: { mr: 2, display: { xs: 'none', md: 'flex' } } },
+  { key: 'small', value: { flexGrow: 2, display: { xs: 'flex', md: 'none' } } },
 ];
 
 const Header = () => {
   const [anchorElNav, setAnchorElNav] = useState<NullableHtmlElement>(null);
-
+  const { isAuthenticated, logout } = useContext(AuthenticationContext);
   const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
+  };
+
+  const handleLogout = () => {
+    if (isAuthenticated) logout();
   };
 
   return (
@@ -39,11 +45,7 @@ const Header = () => {
           {logoProps.map(({ key, value }) => (
             <Typography component="div" key={key} noWrap sx={value}>
               <Link href="/" noLinkStyle>
-                <Logo
-                  src="/images/LogoMitasoft_lg_offyellow.png"
-                  alt="LOGO"
-                  loading="lazy"
-                />
+                <Logo src="/images/LogoMitasoft_lg_offyellow.png" alt="LOGO" loading="lazy" />
               </Link>
             </Typography>
           ))}
@@ -51,7 +53,7 @@ const Header = () => {
           <Box
             sx={{
               flexGrow: 1,
-              display: { xs: "flex", md: "none" },
+              display: { xs: 'flex', md: 'none' },
             }}
           >
             <IconButton
@@ -68,43 +70,63 @@ const Header = () => {
               id="menu-appbar"
               anchorEl={anchorElNav}
               anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
+                vertical: 'bottom',
+                horizontal: 'left',
               }}
               keepMounted
               transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
+                vertical: 'top',
+                horizontal: 'left',
               }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
               sx={{
-                display: { xs: "block", md: "none" },
+                display: { xs: 'block', md: 'none' },
               }}
             >
-              {pages.map(({ name, href }) => (
-                <MenuItem key={name} onClick={handleCloseNavMenu}>
-                  <Link
-                    sx={{ my: 2, color: "black", display: "block" }}
-                    href={href}
-                  >
-                    <Typography textAlign="center">{name}</Typography>
-                  </Link>
-                </MenuItem>
-              ))}
+              {pages
+                .filter(({ authenticated }) => authenticated === isAuthenticated)
+                .map(({ name, href }) => (
+                  <MenuItem key={name} onClick={handleCloseNavMenu}>
+                    <Link sx={{ my: 2, color: 'black', display: 'block' }} href={href}>
+                      <Typography textAlign="center">{name}</Typography>
+                    </Link>
+                  </MenuItem>
+                ))}
+              <Link
+                onClick={handleLogout}
+                sx={{ my: 2, color: 'black', display: 'block' }}
+                href="/login"
+              >
+                <Typography textAlign="center">{isAuthenticated ? 'Logout' : 'Login'}</Typography>
+              </Link>
             </Menu>
           </Box>
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map(({ name, href }) => (
-              <Link
-                key={name}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: "white", display: "block" }}
-                href={href}
-              >
-                <Typography textAlign="center">{name}</Typography>
-              </Link>
-            ))}
+          <Box
+            sx={{
+              flexGrow: 1,
+              display: { xs: 'none', md: 'flex' },
+            }}
+          >
+            {pages
+              .filter(({ authenticated }) => authenticated === isAuthenticated)
+              .map(({ name, href }) => (
+                <Link
+                  key={name}
+                  onClick={handleCloseNavMenu}
+                  sx={{ m: 2, color: 'white', display: 'block' }}
+                  href={href}
+                >
+                  <Typography textAlign="center">{name}</Typography>
+                </Link>
+              ))}
+            <Link
+              onClick={handleLogout}
+              sx={{ m: 2, color: 'white', display: 'block' }}
+              href="/login"
+            >
+              <Typography textAlign="center">{isAuthenticated ? 'Logout' : 'Login'}</Typography>
+            </Link>
           </Box>
         </Toolbar>
       </Container>

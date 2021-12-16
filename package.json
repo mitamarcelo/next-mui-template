@@ -10,12 +10,13 @@
     "@mui/icons-material": "^5.2.1",
     "@mui/material": "latest",
     "clsx": "latest",
+    "moment": "^2.29.1",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest"
   },
   "scripts": {
-    "dev": "next",
+    "dev": "next dev -p 8080",
     "build": "next build",
     "start": "next start",
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
