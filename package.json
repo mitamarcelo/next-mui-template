@@ -3,15 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@date-io/date-fns": "1.x",
     "@emotion/cache": "latest",
     "@emotion/react": "latest",
     "@emotion/server": "latest",
     "@emotion/styled": "latest",
-    "@mui/icons-material": "^5.2.1",
-    "@mui/material": "latest",
+    "@mui/icons-material": "^5.2.5",
+    "@mui/lab": "^5.0.0-alpha.61",
+    "@mui/material": "^5.2.8",
     "clsx": "latest",
+    "date-fns": "^2.23.0",
     "moment": "^2.29.1",
-    "next": "latest",
+    "next": "^12.0.8",
     "react": "latest",
     "react-dom": "latest"
   },
@@ -22,8 +25,8 @@
     "post-update": "echo \"codesandbox preview only, need an update\" && yarn upgrade --latest"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "@types/react": "latest",
+    "@types/node": "^17.0.8",
+    "@types/react": "^17.0.38",
     "@types/react-dom": "latest",
     "typescript": "latest"
   }

@@ -5,15 +5,8 @@ import { useRouter } from 'next/router';
 
 import LoginForm from 'components/LoginForm';
 import { AuthenticationContext } from 'context/AuthenticationContext';
-
+import { pageCenteredContainer } from 'pageStyles/global.styles';
 const Login = () => {
-  const containerStyles = {
-    height: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  };
-
   const { isAuthenticated, error, previousRoute } = useContext(AuthenticationContext);
   const router = useRouter();
 
@@ -24,9 +17,15 @@ const Login = () => {
   });
 
   return (
-    <Container maxWidth="sm" sx={containerStyles}>
-      {!!error && <Alert severity="error">{error}</Alert>}
-      <LoginForm isLogin />
+    <Container maxWidth="sm" sx={pageCenteredContainer}>
+      <Container>
+        {!!error && (
+          <Alert severity="error" sx={{ marginBottom: '16px' }}>
+            {error}
+          </Alert>
+        )}
+        <LoginForm />
+      </Container>
     </Container>
   );
 };

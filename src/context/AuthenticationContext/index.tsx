@@ -1,9 +1,20 @@
 import React, { useState, useEffect, createContext } from 'react';
 import useApi from 'hooks/useApi';
 
+import { camelizeNestedKeys, snakefyKeys } from 'utils/helpers';
+import { PropsWithChildren } from 'types';
+
 export interface ILoginParams {
   email: string;
   password: string;
+}
+
+export interface IUser {
+  email: string;
+  createdAt: string;
+  id: number;
+  name: string;
+  dateOfBirth: string;
 }
 
 interface IAuthenticationContext {
@@ -11,6 +22,7 @@ interface IAuthenticationContext {
   logout: () => void;
   signup: (params: Record<string, any>) => void;
   getToken: () => string | null;
+  user?: IUser;
   isAuthenticated: boolean;
   error: string;
   userLoaded: boolean;
@@ -23,6 +35,7 @@ export const AuthenticationContext = createContext<IAuthenticationContext>({
   logout: () => null,
   signup: (params: Record<string, any>) => null,
   getToken: () => null,
+  user: undefined,
   isAuthenticated: false,
   error: '',
   userLoaded: false,
@@ -30,33 +43,43 @@ export const AuthenticationContext = createContext<IAuthenticationContext>({
   setPreviousRoute: () => null,
 });
 
-const AuthenticationProvider = ({ children }: { children: React.ReactNode }) => {
+const AuthenticationProvider = ({ children }: PropsWithChildren) => {
   const { post } = useApi();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState('');
   const [userLoaded, setUserLoaded] = useState(false);
   const [previousRoute, setPreviousRoute] = useState('/');
+  const [user, setUser] = useState(undefined);
 
   useEffect(() => {
     getAuthentication();
     window.addEventListener('storage', getAuthentication, false);
     setUserLoaded(true);
+    return () => window.removeEventListener('storage', getAuthentication);
   }, []);
 
   const getToken = () => localStorage.getItem('apiKey');
+  const getUser = () =>
+    JSON.parse((typeof window !== 'undefined' ? localStorage.getItem('user') : null) || '');
 
   const getAuthentication = () => {
     const token = getToken();
-    setIsAuthenticated(!!token && token.length > 0);
+    const authenticated = !!token && token.length > 0;
+    setIsAuthenticated(authenticated);
+    if (authenticated) {
+      setUser(getUser());
+    }
   };
 
   const login = async (loginParams: Record<string, any>) => {
     const response = await post('/login', loginParams);
     const body = await response.json();
+    const formattedBody = camelizeNestedKeys(body);
     if (response.status === 200) {
       localStorage.setItem('apiKey', `Bearer ${response.headers.get('Authorization')}`);
-      localStorage.setItem('user', JSON.stringify(body));
+      localStorage.setItem('user', JSON.stringify(formattedBody));
       setIsAuthenticated(true);
+      setUser(getUser());
       setError('');
     } else {
       if (body.error.type === 'credential_invalid') {
@@ -74,7 +97,7 @@ const AuthenticationProvider = ({ children }: { children: React.ReactNode }) => 
   };
 
   const signup = async (loginParams: Record<string, any>) => {
-    const response = await post('/signup', loginParams);
+    const response = await post('/signup', snakefyKeys(loginParams));
     const body = await response.json();
     if (response.status === 200) {
       localStorage.setItem('apiKey', `Bearer ${response.headers.get('Authorization')}`);
@@ -98,6 +121,7 @@ const AuthenticationProvider = ({ children }: { children: React.ReactNode }) => 
         userLoaded,
         previousRoute,
         setPreviousRoute,
+        user,
       }}
     >
       {children}

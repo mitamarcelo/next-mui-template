@@ -12,6 +12,9 @@ export interface IField {
     required?: boolean;
     disabled?: boolean;
     type?: string;
+    inputFormat?: string;
+    inputType?: string;
+    placeholder?: string;
   };
 }
 
@@ -26,7 +29,7 @@ const FormBuilder = ({ formStructure, actionButtons, onSubmit, initialValues }: 
   const defaultInitialValues = {};
 
   formStructure.forEach((field) => {
-    Object.assign(defaultInitialValues, { [field.params.name]: '' });
+    Object.assign(defaultInitialValues, { [field.params.name]: null });
   });
 
   const formInitialValues = initialValues || defaultInitialValues;
@@ -44,6 +47,10 @@ const FormBuilder = ({ formStructure, actionButtons, onSubmit, initialValues }: 
     setFormInput({ [name]: value });
   };
 
+  const handleDatePicker = (fieldName: string, date: Date) => {
+    setFormInput({ [fieldName]: date });
+  };
+
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     onSubmit(formInput);
@@ -59,7 +66,11 @@ const FormBuilder = ({ formStructure, actionButtons, onSubmit, initialValues }: 
             key={fieldName}
             {...field.params}
             defaultValue={formInput[fieldName]}
-            onChange={handleInput}
+            onChange={
+              field.params.inputType === 'datepicker'
+                ? (value: Date) => handleDatePicker(fieldName, value)
+                : handleInput
+            }
           />
         );
       })}
